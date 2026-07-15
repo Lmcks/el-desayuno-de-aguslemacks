@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>El Ritual del Vaso 365 — mi desayuno perfecto desde 2018</title>
+  <meta name="description" content="Vaso IKEA 365+, leche Hacendado sin lactosa, 8 cucharadas de Nesquik y galletas Dinosaurus de Artiach. El desayuno que no cambió desde 2018. Mira el ritual." />
+  <meta property="og:title" content="Siempre lo mismo. Y nunca me canso." />
+  <meta property="og:description" content="El desayuno perfecto de @aguslemacks, paso a paso, desde 2018." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Architects+Daughter&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: #fff; background: #2a2620; overflow-x: hidden;
+    }
+
+    :root {
+      --bg-blur: 8px; --bg-scale: 1.1;
+      --accent: #ffd166; --marker: #ff5d73; --marker2: #6ad7ff;
+      --col: 680px; --img: 540px;
+    }
+
+    /* ===== FONDO: solo video difuminado ===== */
+    #bg-video {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      object-fit: cover; object-position: center;
+      z-index: -2; background: #000; pointer-events: none;
+      filter: blur(var(--bg-blur));
+      transform: scale(var(--bg-scale)); transform-origin: center;
+    }
+    #overlay {
+      position: fixed; inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.22), rgba(0,0,0,0.16));
+      z-index: -1;
+    }
+    #progress { position: fixed; top: 0; left: 0; height: 4px; width: 0%; background: var(--accent); z-index: 50; }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; text-align: center; padding: 0 6vw; position: relative;
+    }
+    .hero img.logo {
+      max-width: min(82vw, 720px); width: 100%; height: auto;
+      filter: drop-shadow(0 6px 18px rgba(0,0,0,0.5)); animation: pop 0.9s ease both;
+    }
+    @keyframes pop { from { opacity: 0; transform: scale(0.92) rotate(-1deg);} to { opacity: 1; transform: scale(1);} }
+    .hero .desde { margin-top: 4px; font-family: Georgia, serif; font-style: italic; letter-spacing: 0.18em; font-size: clamp(0.9rem, 2.4vw, 1.2rem); color: rgba(255,255,255,0.82); }
+    @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)} }
+
+    /* ===== PATRÓN CLÁSICO: texto arriba, imagen abajo ===== */
+    .step { min-height: 100vh; display: flex; align-items: center; padding: 12vh 6vw; position: relative; }
+    .step-inner { width: 100%; max-width: var(--col); margin: 0 auto; text-align: center; }
+    .kicker { font-family: "Caveat", cursive; font-size: clamp(1.3rem, 3.4vw, 2rem); color: var(--marker2); line-height: 1; margin-bottom: 2px; }
+    .step-num { display: inline-block; font-size: clamp(2.6rem, 8vw, 5rem); font-weight: 800; color: var(--accent); line-height: 1; opacity: 0.95; }
+    .step-text h2 { font-size: clamp(1.4rem, 3.8vw, 2.3rem); margin: 12px 0 16px; line-height: 1.15; white-space: nowrap; }
+    .step-text p { font-size: clamp(1rem, 2.4vw, 1.2rem); line-height: 1.65; opacity: 0.94; }
+    .copy-real { max-width: var(--img); margin: 0 auto; text-align: center; }
+    .dato { display: inline-block; margin-top: 20px; padding: 7px 16px; border: 2px dashed rgba(255,255,255,0.5); border-radius: 999px; font-size: 0.85rem; letter-spacing: 0.05em; background: rgba(255,255,255,0.05); transform: rotate(-2.5deg); backdrop-filter: blur(4px); }
+    /* inclinaciones distintas por paso para que no sean todas iguales */
+    .dato.d1 { transform: rotate(-5deg); }
+    .dato.d2 { transform: rotate(3.5deg); }
+    .dato.d3 { transform: rotate(-2deg); }
+    .dato.d4 { transform: rotate(-3.5deg); }
+    .dato.d5 { transform: rotate(4deg); }
+
+    .step-media { max-width: var(--img); margin: 34px auto 0; position: relative; }
+    .step-media img { width: 100%; height: auto; border-radius: 18px; display: block; box-shadow: 0 20px 45px rgba(0,0,0,0.55); transition: transform 0.5s ease; }
+    .step-media img:hover { transform: rotate(-1deg) scale(1.025); }
+    .step-media.two { display: flex; gap: 14px; }
+    .step-media.two img { width: 50%; }
+
+    /* ===== PASO 4: GALERÍA KEN-BURNS + THUMBS (de nueva) ===== */
+    .step-bleed { height: 300vh; position: relative; }
+    .bleed-sticky { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .bleed-inner { width: 100%; max-width: var(--col); padding: 0 6vw; text-align: center; }
+    .bleed-text h2 { font-size: clamp(1.4rem, 3.8vw, 2.3rem); margin: 12px 0 16px; white-space: nowrap; text-align: center; width: fit-content; position: relative; left: 50%; transform: translateX(-50%); }
+    .bleed-text p { font-size: clamp(1rem, 2.6vw, 1.25rem); line-height: 1.6; }
+    .bleed-text .dato { margin-top: 18px; transform: rotate(-3.5deg); }
+
+    .carousel { max-width: 600px; margin: 30px auto 0; position: relative; }
+    .carousel-frame {
+      position: relative; width: 100%; aspect-ratio: 4/3;
+      border-radius: 22px; overflow: hidden;
+      box-shadow: 0 30px 70px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .carousel-frame img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; opacity: 0;
+      transition: opacity 0.7s ease;
+    }
+    .carousel-frame img.active { opacity: 1; }
+
+    .carousel-foot { display: flex; align-items: center; gap: 18px; justify-content: center; margin-top: 22px; }
+    .thumbs { display: flex; gap: 10px; }
+    .thumbs img {
+      width: 58px; height: 58px; object-fit: cover; border-radius: 12px;
+      opacity: 0.45; filter: grayscale(0.35); cursor: default;
+      border: 2px solid transparent; transition: all 0.35s ease;
+    }
+    .thumbs img.on { opacity: 1; filter: none; border-color: var(--accent); transform: scale(1.1); box-shadow: 0 0 14px rgba(255,209,102,0.45); }
+
+    /* ===== CONTADOR CREATIVO ===== */
+    .counter { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10vh 6vw; }
+    .counter h2 { font-size: clamp(1.8rem, 5vw, 3rem); margin-bottom: 10px; letter-spacing: -0.01em; }
+    .counter .intro { max-width: 600px; font-size: clamp(1rem, 2.5vw, 1.25rem); line-height: 1.6; opacity: 0.92; margin-bottom: 40px; }
+
+    .scoreboard { display: flex; flex-wrap: wrap; gap: clamp(20px, 5vw, 56px); justify-content: center; margin-bottom: 38px; }
+    .score {
+      position: relative; padding: 30px 30px 22px; min-width: 190px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 22px; backdrop-filter: blur(4px); overflow: visible;
+    }
+    /* aura / resplandor detrás del número */
+    .score::before {
+      content: ""; position: absolute; inset: -18% -10% 30% -10%; z-index: -1;
+      background: radial-gradient(ellipse at center, var(--aura, rgba(255,209,102,0.22)), transparent 70%);
+      filter: blur(14px); border-radius: 50%;
+    }
+    .score.cajas { --aura: rgba(106,215,255,0.22); }
+    .score.euros { --aura: rgba(255,93,115,0.22); }
+    .score .num { font-size: clamp(2.6rem, 8vw, 4.2rem); font-weight: 800; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums; }
+    .score.cajas .num { color: var(--marker2); }
+    .score.euros .num { color: var(--marker); }
+    .score .label { margin-top: 10px; font-size: 0.8rem; letter-spacing: 0.07em; opacity: 0.85; }
+
+    .counter .eslogan {
+      font-family: "Caveat", cursive; font-size: clamp(1.5rem, 4vw, 2.3rem);
+      color: var(--accent); margin-top: 6px; max-width: 620px; line-height: 1.25;
+      white-space: nowrap; text-align: center;
+    }
+    @media (max-width: 768px) { .counter .eslogan { font-size: 1.15rem; } }
+    .foot-note { margin-top: 18px; font-size: 0.85rem; opacity: 0.7; font-style: italic; }
+
+    /* ===== CTA (botón Instagram → DM directo) ===== */
+    .cta { padding: 10vh 6vw 7vh; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .cta .pregunta { font-size: clamp(1.2rem, 3.2vw, 1.7rem); line-height: 1.5; margin: 0 0 24px; white-space: nowrap; text-align: center; max-width: 92vw; }
+    @media (max-width: 768px) {
+      .bleed-inner { padding: 0 4vw; }
+      .bleed-text h2 { font-size: 1.1rem; }
+      .cta { padding: 10vh 4vw 7vh; }
+      .cta .pregunta { font-size: 0.74rem; }
+    }
+    .ig-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 13px 26px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.06); color: #fff;
+      text-decoration: none; font-size: 1.05rem; letter-spacing: 0.02em;
+      backdrop-filter: blur(4px); transition: background 0.25s, transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+      animation: ig-call 3.5s ease-in-out infinite;
+    }
+    @keyframes ig-call {
+      0%, 78%, 100% { transform: translateX(0) rotate(0); }
+      80% { transform: translateX(-3px) rotate(-1.2deg); }
+      84% { transform: translateX(3px) rotate(1.2deg); }
+      88% { transform: translateX(-2px) rotate(-0.8deg); }
+      92% { transform: translateX(2px) rotate(0.8deg); }
+      96% { transform: translateX(0) rotate(0); }
+    }
+    .ig-btn:hover { background: rgba(255,209,102,0.16); border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,209,102,0.25); animation: none; }
+    .ig-btn .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--marker); }
+    .cta .sig { margin-top: 30px; font-family: "Caveat", cursive; font-size: clamp(1.3rem, 3.6vw, 2rem); color: var(--accent); line-height: 1.3; max-width: 560px; margin-left: auto; margin-right: auto; }
+
+    /* reveal: animación sutil que NUNCA oculta el contenido (seguro si el JS falla) */
+    .js .reveal { transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .js .reveal.in { opacity: 1; transform: none; }
+
+    /* ===== Cookie Rain (galletas dinosaurio cayendo) ===== */
+    #cookie-layer { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 9999; }
+    .falling { position: absolute; pointer-events: auto; touch-action: none; cursor: pointer; user-select: none; -webkit-user-select: none; will-change: transform; filter: drop-shadow(0 6px 10px rgba(0,0,0,.35)); }
+    .piece { position: absolute; pointer-events: none; will-change: transform, opacity; }
+
+  </style>
+</head>
+<body>
+
+  <div id="progress"></div>
+
+  <video id="bg-video" muted playsinline preload="auto">
+    <source src="bg-optimized.mp4" type="video/mp4" />
+  </video>
+  <div id="overlay"></div>
+
+  <!-- ============================ HERO ============================ -->
+  <header class="hero">
+    <img class="logo" src="logo.png" alt="El desayuno de Aguslemacks" />
+    <p class="desde">desde 2018</p>
+  </header>
+
+  <main>
+
+    <!-- PASO 1 -->
+    <section class="step reveal">
+      <div class="step-inner">
+        <p class="kicker">paso 1 de 5</p>
+        <span class="step-num">01</span>
+        <div class="step-text">
+          <h2>El vaso (no sé)</h2>
+          <p class="copy-real">Coges un vaso, no un tupper, no una sartén. Un vaso de 45 cl. Lo pones en la mesa y le das las gracias antes de usarlo 🙏</p>
+          <span class="dato d1">VASO IKEA 365+ · 45CL</span>
+        </div>
+        <div class="step-media">
+          <img src="receta/1.webp" alt="Vaso 365+ vacío, luz de mañana" loading="lazy" />
+        </div>
+      </div>
+    </section>
+
+    <!-- PASO 2 -->
+    <section class="step reveal">
+      <div class="step-inner">
+        <p class="kicker">paso 2 de 5</p>
+        <span class="step-num">02</span>
+        <div class="step-text">
+          <h2>La lechita</h2>
+          <p class="copy-real">No ordeñamos la vaca. La compramos en Mercadona, leche desnatada y sin lactosa de Hacendado. El néctar de los dioses, versionado para estómagos débiles. Pues unos 25cl, si usas mi mismo vaso es un poco más de la mitad del vaso.</p>
+          <span class="dato d2">LECHE DESNATADA SIN LACTOSA · 25CL</span>
+        </div>
+        <div class="step-media">
+          <img src="receta/2.webp" alt="Vaso con leche blanca fría" loading="lazy" />
+        </div>
+      </div>
+    </section>
+
+    <!-- PASO 3 — diptych -->
+    <section class="step reveal">
+      <div class="step-inner">
+        <p class="kicker">paso 3 de 5</p>
+        <span class="step-num">03</span>
+        <div class="step-text">
+          <h2>Nesquik, la main character ;)</h2>
+          <p class="copy-real">La cuchara tiene que ser de postre normal/mediana. La diminuta de café no tiene sentido, la gigante de sopa haces un batido de cemento. Una, dos, tres... hasta ocho.</p>
+          <span class="dato d3">8cho "me como un bizcocho"</span>
+        </div>
+        <div class="step-media two">
+          <img src="receta/3.webp" alt="Cuchara echando Nesquik en polvo" loading="lazy" />
+          <img src="receta/4.webp" alt="Vaso ya mezclado, chocolate listo" loading="lazy" />
+        </div>
+      </div>
+    </section>
+
+    <!-- PASO 4 — GALERÍA KEN-BURNS + THUMBS (de nueva) -->
+    <section class="step-bleed" id="step4">
+      <div class="bleed-sticky">
+        <div class="bleed-inner">
+          <p class="kicker">paso 4 de 5</p>
+          <span class="step-num">04</span>
+          <div class="bleed-text">
+            <h2>La ruptura 💔 Dinosaurus</h2>
+            <p class="copy-real">La relación se rompe, pero es lo mejor para ambos (broma poética sin gracia). Coges las galletas <em>dentro del envoltorio</em> las rompes con los pulgares un par de veces y luego los echas dentro del vaso. Mira las imágenes de abajo.</p>
+            <span class="dato d4">DINOSAURUS · ARTIACH</span>
+          </div>
+          <div class="carousel">
+            <div class="carousel-frame">
+              <img class="cseq active" src="receta/5.webp" alt="Vaso chocolate + caja Dinosaurus Artiach" />
+              <img class="cseq" src="receta/7.webp" alt="Mano con paquete cerrado de galletas" />
+              <img class="cseq" src="receta/8.webp" alt="Mano con galleta partida dentro del envoltorio" />
+              <img class="cseq" src="receta/9.webp" alt="Vertiendo galletas partidas al vaso" />
+            </div>
+            <div class="carousel-foot">
+              <div class="thumbs">
+                <img class="t on" src="receta/5.webp" alt="" />
+                <img class="t" src="receta/7.webp" alt="" />
+                <img class="t" src="receta/8.webp" alt="" />
+                <img class="t" src="receta/9.webp" alt="" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PASO 5 — usa foto 6 (sin repetir) -->
+    <section class="step reveal">
+      <div class="step-inner">
+        <p class="kicker">paso 5 de 5</p>
+        <span class="step-num">05</span>
+        <div class="step-text">
+          <h2>Cuchara, y a ser feliz :P</h2>
+          <p class="copy-real">"Sabor a entonces" Siempre lo mismo, siempre perfecto. Super suavecito para la panza, como un abrigo interno, me recuerda que hay cosas que todavía funcionan. Que hay mañanas que valen la pena. El mejor desayuno, también válido para las meriendas.</p>
+          <span class="dato d5">#DESAYUNOLEMACKS</span>
+        </div>
+        <div class="step-media">
+          <img src="receta/10.webp" alt="Vaso con galletas flotando y cuchara" loading="lazy" />
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================== CONTADOR CREATIVO ===================== -->
+  <section class="counter">
+    <h2>Esto no es un hábito.</h2>
+    <p class="intro">Mi vicio más caro. Y, sin duda, el que mejor me sienta.</p>
+
+    <div class="scoreboard">
+      <div class="score cajas">
+        <div class="num" id="m-cajas">0</div>
+        <div class="label">CAJAS DE DINOSAURUS</div>
+      </div>
+      <div class="score">
+        <div class="num" id="m-galletas">0</div>
+        <div class="label">GALLETAS DEVORADAS</div>
+      </div>
+      <div class="score euros">
+        <div class="num" id="m-euros">0</div>
+        <div class="label">EUROS EN FELICIDAD</div>
+      </div>
+    </div>
+
+    <p class="eslogan" id="m-eslogan">Y los miércoles, que es día de dinosaurus, también.</p>
+    <p class="foot-note">Cifras calculadas con cariño. Y con bastante azúcar.</p>
+  </section>
+
+  <!-- ===================== CTA / FIRMA ===================== -->
+  <footer class="cta">
+    <p class="pregunta">¿Tu desayuno también es siempre el mismo? Cuéntamelo.</p>
+    <a class="ig-btn" href="https://ig.me/m/aguslemacks" target="_blank" rel="noopener">
+      <span class="dot"></span> @aguslemacks
+    </a>
+    <p class="sig">Un vaso. <span id="m-anos">Ocho</span> años. Infinitas mañanas.</p>
+  </footer>
+
+  <script>
+    // Marca que el JS está vivo (activa el reveal sin romper si falla)
+    document.documentElement.classList.add('js');
+    // ============================================================
+    //  SITE_CONFIG — contador (datos exactos del creador)
+    //  1 caja Dinosaurus = 10 paquetes = 2,80€
+    //  1 paquete = 4 galletitas
+    //  2 paquetes/día = 8 galletas/día
+    //  cada 5 días = 1 caja = 2,80€
+    // ============================================================
+    const SITE_CONFIG = {
+      handle: "@aguslemacks",
+      inicio: new Date(2018, 0, 1),
+      paquetesPorDia: 2,
+      galletasPorPaquete: 4,
+      paquetesPorCaja: 10,
+      precioCaja: 2.80
+    };
+    const igBtn = document.querySelector('.ig-btn');
+    if (igBtn) igBtn.textContent = SITE_CONFIG.handle;
+
+    const hoy = new Date();
+    const dias = Math.max(1, Math.floor((hoy - SITE_CONFIG.inicio) / 86400000));
+    const paquetes = SITE_CONFIG.paquetesPorDia * dias;
+    const galletas = paquetes * SITE_CONFIG.galletasPorPaquete;
+    const cajas = Math.floor(paquetes / SITE_CONFIG.paquetesPorCaja);
+    const euros = cajas * SITE_CONFIG.precioCaja;
+
+    // ===== ESLOGAN DINÁMICO: día de la semana (todos son día de dinosaurus) =====
+    const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+    const diaHoy = DIAS[hoy.getDay()];
+    const esloganEl = document.getElementById('m-eslogan');
+    if (esloganEl) esloganEl.textContent = 'Y los ' + diaHoy + ', que es día de dinosaurus, también.';
+
+    // ===== FIRMA: años desde 2018 (Ocho → Nueve → Diez...) =====
+    const aniosEl = document.getElementById('m-anos');
+    if (aniosEl) aniosEl.textContent = String(hoy.getFullYear() - SITE_CONFIG.inicio.getFullYear());
+
+    // ===== 1) SCRUBBING fondo (directo en scroll, sin rAF para máxima fiabilidad) =====
+    const video = document.getElementById('bg-video');
+    const progress = document.getElementById('progress');
+    let duration = 10;
+    video.addEventListener('loadedmetadata', () => { duration = video.duration; updateFromScroll(); });
+    function updateFromScroll() {
+      const denom = document.documentElement.scrollHeight - window.innerHeight;
+      const ratio = denom > 0 ? window.scrollY / denom : 0;
+      const target = ratio * duration;
+      if (Math.abs(video.currentTime - target) > 0.01) video.currentTime = target;
+      progress.style.width = (ratio * 100).toFixed(2) + '%';
+    }
+    window.addEventListener('scroll', updateFromScroll, { passive: true });
+    window.addEventListener('resize', updateFromScroll);
+    updateFromScroll();
+
+    // ===== 2) PASO 4 — galería ken-burns + thumbs (de nueva) =====
+    const step4 = document.getElementById('step4');
+    const cseq = step4.querySelectorAll('.carousel-frame .cseq');
+    const thumbs = step4.querySelectorAll('.thumbs .t');
+    const total = cseq.length;
+    function updateStep4() {
+      const rect = step4.getBoundingClientRect();
+      const denom = rect.height - window.innerHeight;
+      const passed = Math.min(Math.max(-rect.top, 0), denom);
+      const p = denom > 0 ? passed / denom : 0;
+      const idx = Math.min(total - 1, Math.floor(p * total));
+      cseq.forEach((im, i) => im.classList.toggle('active', i === idx));
+      thumbs.forEach((t, i) => t.classList.toggle('on', i === idx));
+    }
+    window.addEventListener('scroll', updateStep4, { passive: true });
+    window.addEventListener('resize', updateStep4);
+    updateStep4();
+
+    // ===== 3) Revelado =====
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // ===== 4) Contador creativo animado =====
+    function animateCount(el, target, prefix = '') {
+      const dur = 2200; const start = performance.now();
+      function tick(now) {
+        const t = Math.min((now - start) / dur, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = prefix + Math.floor(eased * target).toLocaleString('es-ES');
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          animateCount(document.getElementById('m-cajas'), cajas);
+          animateCount(document.getElementById('m-galletas'), galletas);
+          animateCount(document.getElementById('m-euros'), euros, '€');
+          counterObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    counterObserver.observe(document.querySelector('.counter'));
+  </script>
+
+  <!-- ===================== COOKIE RAIN (galletas dinosaurio cayendo) ===================== -->
+  <div id="cookie-layer" aria-hidden="true"></div>
+  <script src="cookie-rain/cookie-rain.assets.js"></script>
+  <script src="cookie-rain/cookie-rain.js"></script>
+
+</body>
+</html>

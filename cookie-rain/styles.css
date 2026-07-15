@@ -1,0 +1,34 @@
+/* =========================================================================
+   LLUVIA DE GALLETAS — hoja de estilos (solo la capa de galletas).
+   La capa #cookie-layer es TRANSPARENTE y NO bloquea los clics de tu web
+   (pointer-events:none), salvo en la propia galleta que cae (.falling).
+   Pega este bloque en el CSS de tu web. El fondo de tu web se ve debajo.
+   ========================================================================= */
+
+/* ---- Capa de galletas (NO tocar) ---- */
+#cookie-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;   /* la capa no bloquea clics al contenido de tu web */
+  overflow: hidden;
+  z-index: 9999;          /* encima de tu contenido; bajalo si quieres */
+}
+
+/* Galleta entera que cae: SÍ recibe clics/taps */
+.falling {
+  position: absolute;
+  pointer-events: auto;    /* pero la galleta en sí sí */
+  touch-action: none;      /* evita scroll accidental al tocar en móvil */
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: transform;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,.35));
+}
+
+/* Trozos de la explosión: NO reciben clics (pura animación) */
+.piece {
+  position: absolute;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
