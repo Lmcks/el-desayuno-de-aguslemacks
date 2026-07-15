@@ -183,7 +183,7 @@
 
   <div id="progress"></div>
 
-  <video id="bg-video" muted playsinline preload="auto">
+  <video id="bg-video" muted playsinline webkit-playsinline autoplay loop preload="auto" disableRemotePlayback x5-playsinline>
     <source src="bg-optimized.mp4" type="video/mp4" />
   </video>
   <div id="overlay"></div>
@@ -370,6 +370,27 @@
     const progress = document.getElementById('progress');
     let duration = 10;
     video.addEventListener('loadedmetadata', () => { duration = video.duration; updateFromScroll(); });
+
+    // iOS Safari no permite "seek" (currentTime) hasta que el video se reproduce al menos
+    // una vez. Hacemos un priming play->pause para desbloquear el scrubbing del fondo.
+    let primed = false;
+    function primeVideo() {
+      if (primed) return;
+      const p = video.play();
+      if (p && typeof p.then === 'function') {
+        p.then(() => { video.pause(); primed = true; updateFromScroll(); })
+         .catch(() => { /* autoplay bloqueado: se reintenta con el primer toque */ });
+      } else {
+        try { video.pause(); } catch (e) {}
+        primed = true; updateFromScroll();
+      }
+    }
+    video.addEventListener('loadeddata', primeVideo);
+    video.addEventListener('canplay', primeVideo);
+    // Respaldo: si iOS bloquea el autoplay, el primer toque/click desbloquea el video.
+    ['touchstart', 'click'].forEach(ev =>
+      window.addEventListener(ev, primeVideo, { once: true, passive: true }));
+
     function updateFromScroll() {
       const denom = document.documentElement.scrollHeight - window.innerHeight;
       const ratio = denom > 0 ? window.scrollY / denom : 0;
@@ -380,6 +401,7 @@
     window.addEventListener('scroll', updateFromScroll, { passive: true });
     window.addEventListener('resize', updateFromScroll);
     updateFromScroll();
+    primeVideo();
 
     // ===== 2) PASO 4 — galería ken-burns + thumbs (de nueva) =====
     const step4 = document.getElementById('step4');
