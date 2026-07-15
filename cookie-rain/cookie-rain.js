@@ -38,6 +38,32 @@ const CONFIG = {
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const layer = document.getElementById('cookie-layer');
 
+/* iOS Safari no actualiza la zona táctil de un elemento animado (Web Animations
+   API) hasta que hay un repaint, por eso en móvil había que mover el scroll para
+   poder romper la galleta. Solución: hit-testing manual en un listener global.
+   getBoundingClientRect() SÍ refleja la posición animada real en iOS, así que
+   buscamos la galleta bajo el dedo/cursor y la reventamos aunque estés quieto. */
+function hitCookieAt(clientX, clientY) {
+  const cookies = document.querySelectorAll('.falling');
+  // Recorremos de la última a la primera (la de encima tiene prioridad).
+  for (let i = cookies.length - 1; i >= 0; i--) {
+    const r = cookies[i].getBoundingClientRect();
+    if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) {
+      return cookies[i];
+    }
+  }
+  return null;
+}
+function onGlobalTap(e) {
+  const t = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]) || e;
+  const x = t.clientX, y = t.clientY;
+  if (x == null || y == null) return;
+  const hit = hitCookieAt(x, y);
+  if (hit) { e.preventDefault(); popCookie(hit); }
+}
+document.addEventListener('touchstart', onGlobalTap, { passive: false });
+document.addEventListener('pointerdown', onGlobalTap, { passive: false });
+
 /* Utilidades -------------------------------------------------------------- */
 const rand = (a, b) => a + Math.random() * (b - a);
 const makeCanvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
@@ -155,7 +181,8 @@ function spawnCookie() {
   );
   img._fall = anim;
   anim.onfinish = () => img.remove();
-  img.addEventListener('pointerdown', (e) => { e.preventDefault(); popCookie(img); }, { passive: false });
+  // El toque/click se gestiona con el handler global (onGlobalTap) para que
+  // funcione en iOS aunque el usuario esté quieto (hit-testing por rect).
 }
 
 function popCookie(img) {

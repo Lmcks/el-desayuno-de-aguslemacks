@@ -393,8 +393,13 @@
 
     function updateFromScroll() {
       const denom = document.documentElement.scrollHeight - window.innerHeight;
-      const ratio = denom > 0 ? window.scrollY / denom : 0;
-      const target = ratio * duration;
+      let ratio = denom > 0 ? window.scrollY / denom : 0;
+      // Clamp: en iOS el "rubber-band" al final/inicio hace scrollY < 0 o > max,
+      // lo que llevaría currentTime fuera de rango y el video parpadea/reinicia.
+      if (ratio < 0) ratio = 0;
+      else if (ratio > 1) ratio = 1;
+      // Nunca tocar el último frame exacto (iOS a veces lo interpreta como "fin" y reinicia).
+      const target = Math.min(ratio * duration, duration - 0.05);
       if (Math.abs(video.currentTime - target) > 0.01) video.currentTime = target;
       progress.style.width = (ratio * 100).toFixed(2) + '%';
     }
