@@ -40,11 +40,14 @@
     }
     #progress { position: fixed; top: 0; left: 0; height: 4px; width: 0%; background: var(--accent); z-index: 50; }
 
-    /* ===== VEIL de lluvia suave (paso 4, imágenes 1 y 2) ===== */
+    /* ===== VEIL de lluvia suave (paso 4) ===== */
     /* Cubre TODA la pantalla y OCULTA el vídeo de fondo al 100% (no se ve absolutamente).
-       Azul noche tenue + líneas azules cayendo, muy soft. */
+       Azul noche tenue + líneas azules cayendo, muy soft.
+       Usa 100dvh (dynamic viewport) para que en móvil, al ocultarse la barra de URL al
+       scrollear, no quede un hueco abajo por donde se vea el vídeo. Fallback 100vh. */
     #rain-veil {
-      position: fixed; inset: 0; z-index: 3; pointer-events: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      height: 100vh; height: 100dvh; z-index: 3; pointer-events: none;
       opacity: 0; transition: opacity 0.9s ease;
       background:
         radial-gradient(120% 80% at 50% 0%, rgba(18,26,52,0.92) 0%, rgba(14,20,44,0.98) 100%),
@@ -518,9 +521,19 @@
     }
 
     let currentIdx = 0;
+    // Viewport alto ESTABLE: en móvil la URL-bar cambia innerHeight al scrollear y eso
+    // hacía oscilar el umbral del veil (tirones/parpadeos). Lo fijamos solo en resize/load.
+    let vhEstable = window.innerHeight;
+    function medirVH() { vhEstable = (window.visualViewport && window.visualViewport.height) || window.innerHeight; }
+    medirVH();
+    window.addEventListener('resize', medirVH);
+    window.addEventListener('orientationchange', medirVH);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', medirVH);
+    let rainOn = false;   // evita re-disparar la transición de opacidad en cada scroll
+
     function updateStep4() {
       const rect = step4.getBoundingClientRect();
-      const denom = rect.height - window.innerHeight;
+      const denom = rect.height - vhEstable;
       const passed = Math.min(Math.max(-rect.top, 0), denom);
       const p = denom > 0 ? passed / denom : 0;
       const idx = Math.min(total - 1, Math.floor(p * total));
@@ -528,14 +541,17 @@
       cseq.forEach((im, i) => im.classList.toggle('active', i === idx));
       thumbs.forEach((t, i) => t.classList.toggle('on', i === idx));
       // VEIL en el paso 4, con 2 "fotogramas" de margen antes y corta POCO ANTES de que
-      // el bloque 4 se desbloquee (deje de estar sticky). El bloque suelta en rect.top = -2*vh,
-      // así que apagamos un pelín antes (-1.85*vh) para que el paso 5 aparezca con scroll normal.
-      //  - entra 2 fotogramas antes: rect.top <= 0.5 * viewport (viniendo de abajo)
-      //  - sale poco antes de desbloquear el bloque 4: rect.top > -1.85 * viewport
-      const vh = window.innerHeight;
+      // el bloque 4 se desbloquee. Umbrales con vhEstable (no saltan con la URL-bar).
+      //  - entra 2 fotogramas antes: rect.top <= 0.5 * vhEstable
+      //  - sale poco antes de desbloquear: rect.top > -1.85 * vhEstable
+      const vh = vhEstable;
       const entra = rect.top <= vh * 0.5;
       const sale  = rect.top > -vh * 1.85;
-      if (entra && sale) rainVeil.classList.add('on'); else rainVeil.classList.remove('on');
+      const debeEstarOn = entra && sale;
+      if (debeEstarOn !== rainOn) {            // SOLO cambia si el estado realmente cambia
+        rainOn = debeEstarOn;
+        rainVeil.classList.toggle('on', rainOn);
+      }
       // Si PC está "despierto" por hover, mantengo la pose en el marco activo.
       if (ES_PC && step4Awake) awakeActive();
     }
