@@ -16,7 +16,10 @@
     html { scroll-behavior: smooth; }
     body {
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      color: #fff; background: #2a2620; overflow-x: hidden;
+      color: #fff; background: #2a2620;
+      /* clip (no hidden) evita el scroll horizontal SIN romper position:fixed en móvil
+         (hidden convertía los fixed en absolutos y desaparecía la barra de progreso / vídeo). */
+      overflow-x: clip;
     }
 
     :root {
@@ -43,34 +46,37 @@
 
     /* ===== VEIL de lluvia suave (paso 4) ===== */
     /* fixed + 100dvh cubre TODA la ventana (incluido el margen abajo en móvil).
-       z-index 45: POR DEBAJO de #progress (50, siempre visible encima) y POR DEBAJO
-       del contenido del paso 4 (.bleed-sticky z-index 60, que queda encima de la lluvia).
-       Oculta el vídeo (-2) pero nunca la barra ni el texto/foto.
+       z-index: -1 -> delante del vídeo (-2) pero DETRÁS de todo el contenido de la página
+       (que está en flujo, z auto 0) y de la barra #progress (z 50). Así la lluvia tapa el
+       vídeo pero NUNCA tapa el texto/foto del paso 4 ni la barra de progreso.
        Fade largo y suave para que no entre "en bloque". */
     #rain-veil {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      height: 100vh; height: 100dvh; z-index: 45; pointer-events: none;
+      height: 100vh; height: 100dvh; z-index: -1; pointer-events: none;
       opacity: 0; transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
       background:
         radial-gradient(120% 80% at 50% 0%, rgba(18,26,52,0.92) 0%, rgba(14,20,44,0.98) 100%),
         linear-gradient(180deg, rgba(14,20,44,0.96), rgba(10,15,36,0.99));
     }
     #rain-veil.on { opacity: 1; }
-    /* Capa de líneas de lluvia: patrón de trazos finos azules que cae de forma continua.
-       El patrón se repite verticalmente cada 60px; la animación desplaza EXACTAMENTE 60px
-       (una altura de patrón) para que el bucle sea invisible (sin "reinicio"). Muy lenta. */
+    /* Capa de líneas de lluvia: patrón de líneas finas azules. Se anima con background-position
+       (continuo, sin cortes) y muy lento. El patrón se repite cada 60px en Y, y la animación
+       mueve exactamente 60px -> bucle invisible. */
     #rain-veil::before {
-      content: ""; position: absolute; left: 0; right: 0; top: -120px; height: calc(100% + 240px);
+      content: ""; position: absolute; inset: 0;
       background-image: repeating-linear-gradient(
-        100deg,
-        transparent 0, transparent 28px,
-        rgba(150,190,255,0.12) 28px, rgba(150,190,255,0.12) 29px,
-        transparent 29px, transparent 60px
+        102deg,
+        transparent 0, transparent 30px,
+        rgba(150,190,255,0.11) 30px, rgba(150,190,255,0.11) 31px,
+        transparent 31px, transparent 62px
       );
-      background-size: 60px 60px;
-      animation: rain-fall 7s linear infinite;
+      background-size: 62px 62px;
+      animation: rain-fall 6s linear infinite;
     }
-    @keyframes rain-fall { from { transform: translateY(0); } to { transform: translateY(60px); } }
+    @keyframes rain-fall {
+      from { background-position: 0 0; }
+      to   { background-position: -20px 62px; }
+    }
 
     /* ===== HERO ===== */
     .hero {
@@ -108,9 +114,9 @@
 
     /* ===== PASO 4: GALERÍA KEN-BURNS + THUMBS (de nueva) ===== */
     .step-bleed { height: 300vh; position: relative; }
-    /* z-index 60: el contenido del paso 4 queda ENCIMA del veil de lluvia (45) y de la
-       barra de progreso (50) -> la lluvia nunca tapa el texto ni la foto, ni la barra. */
-    .bleed-sticky { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; justify-content: center; z-index: 60; }
+    /* 100dvh para que el bloque mida la ventana real y el contenido quede CENTRADO
+       (si usara 100vh se vería empujado arriba al ocultarse la URL-bar del móvil). */
+    .bleed-sticky { position: sticky; top: 0; height: 100vh; height: 100dvh; display: flex; align-items: center; justify-content: center; z-index: 4; }
     .bleed-inner { width: 100%; max-width: var(--col); padding: 0 6vw; text-align: center; }
     .bleed-text h2 { font-size: clamp(1.4rem, 3.8vw, 2.3rem); margin: 12px 0 16px; white-space: nowrap; text-align: center; width: fit-content; position: relative; left: 50%; transform: translateX(-50%); }
     .bleed-text p { font-size: clamp(1rem, 2.6vw, 1.25rem); line-height: 1.6; }
