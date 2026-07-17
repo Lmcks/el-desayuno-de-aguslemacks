@@ -61,17 +61,16 @@
     .step-text h2 { font-size: clamp(1.4rem, 3.8vw, 2.3rem); margin: 12px 0 16px; line-height: 1.15; white-space: nowrap; }
     .step-text p { font-size: clamp(1rem, 2.4vw, 1.2rem); line-height: 1.65; opacity: 0.94; }
     .copy-real { max-width: var(--img); margin: 0 auto; text-align: center; }
-    .dato { display: inline-block; margin-top: 20px; padding: 7px 16px; border: 2px dashed rgba(255,255,255,0.5); border-radius: 999px; font-size: 0.85rem; letter-spacing: 0.05em; background: rgba(255,255,255,0.05); transform: rotate(-2.5deg); backdrop-filter: blur(4px); }
+    .dato { --rot: -2.5deg; display: inline-block; margin-top: 20px; padding: 7px 16px; border: 2px dashed rgba(255,255,255,0.5); border-radius: 999px; font-size: 0.85rem; letter-spacing: 0.05em; background: rgba(255,255,255,0.05); transform: rotate(var(--rot)); backdrop-filter: blur(4px); }
     /* inclinaciones distintas por paso para que no sean todas iguales */
-    .dato.d1 { transform: rotate(-5deg); }
-    .dato.d2 { transform: rotate(3.5deg); }
-    .dato.d3 { transform: rotate(-2deg); }
-    .dato.d4 { transform: rotate(-3.5deg); }
-    .dato.d5 { transform: rotate(4deg); }
+    .dato.d1 { --rot: -5deg; transform: rotate(var(--rot)); }
+    .dato.d2 { --rot: 3.5deg; transform: rotate(var(--rot)); }
+    .dato.d3 { --rot: -2deg; transform: rotate(var(--rot)); }
+    .dato.d4 { --rot: -3.5deg; transform: rotate(var(--rot)); }
+    .dato.d5 { --rot: 4deg; transform: rotate(var(--rot)); }
 
     .step-media { max-width: var(--img); margin: 34px auto 0; position: relative; }
-    .step-media img { width: 100%; height: auto; border-radius: 18px; display: block; box-shadow: 0 20px 45px rgba(0,0,0,0.55); transition: transform 0.5s ease; }
-    .step-media img:hover { transform: rotate(-1deg) scale(1.025); }
+    .step-media img { width: 100%; height: auto; border-radius: 18px; display: block; box-shadow: 0 20px 45px rgba(0,0,0,0.55); cursor: pointer; }
     .step-media.two { display: flex; gap: 14px; }
     .step-media.two img { width: 50%; }
 
@@ -138,6 +137,30 @@
     @media (max-width: 768px) { .counter .eslogan { font-size: 1.15rem; } }
     .foot-note { margin-top: 18px; font-size: 0.85rem; opacity: 0.7; font-style: italic; }
 
+    /* ===== TEASER "Coming Soon" (placeholder de la animación original) ===== */
+    .teaser { padding: 8vh 6vw 16vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    .teaser-frame {
+      position: relative; display: block;
+      aspect-ratio: 9 / 16;              /* formato vertical de vídeo (reel) */
+      height: min(72vh, 560px); width: auto; max-width: 92vw;
+      border-radius: 18px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .teaser-frame:hover { transform: translateY(-4px); box-shadow: 0 24px 52px rgba(0,0,0,0.55); }
+    /* La imagen (o el futuro <video>) llena el marco 9:16 centrada, sin deformarse. */
+    .teaser-frame img, .teaser-frame video {
+      display: block; width: 100%; height: 100%;
+      object-fit: cover; object-position: center;
+    }
+    .teaser-cap { margin-top: 16px; font-size: 0.9rem; opacity: 0.75; letter-spacing: 0.02em; }
+    @media (max-width: 768px) {
+      .teaser { padding: 8vh 3vw; }
+      .teaser-frame { height: 82vh; max-width: 94vw; border-radius: 14px; }
+      .teaser-cap { margin-top: 14px; font-size: 0.95rem; }
+    }
+
     /* ===== CTA (botón Instagram → DM directo) ===== */
     .cta { padding: 10vh 6vw 7vh; display: flex; flex-direction: column; align-items: center; text-align: center; }
     .cta .pregunta { font-size: clamp(1.2rem, 3.2vw, 1.7rem); line-height: 1.5; margin: 0 0 24px; white-space: nowrap; text-align: center; max-width: 92vw; }
@@ -168,14 +191,39 @@
     .ig-btn .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--marker); }
     .cta .sig { margin-top: 30px; font-family: "Caveat", cursive; font-size: clamp(1.3rem, 3.6vw, 2rem); color: var(--accent); line-height: 1.3; max-width: 560px; margin-left: auto; margin-right: auto; }
 
+    /* Emoji que flota muy leve (casi imperceptible). Sin estorbar la lectura.
+       Incondicional (como las chispitas): es decorativo e inofensivo, se ve siempre. */
+    .emoji-float { display: inline-block; will-change: transform; animation: emoji-float 4.5s ease-in-out infinite; }
+    @keyframes emoji-float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-4px); }
+    }
+
     /* reveal: animación sutil que NUNCA oculta el contenido (seguro si el JS falla) */
-    .js .reveal { transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .js .reveal { transform: translateY(28px); transition: opacity 0.7s ease, transform 0.85s cubic-bezier(0.34, 1.56, 0.64, 1); }
     .js .reveal.in { opacity: 1; transform: none; }
+
+    /* La física de "peso" al aparecer (número/imagen/etiqueta cayendo y posándose)
+       se aplica por JS (ver bloque 3c) para que funcione aunque el sistema tenga
+       "reducir movimiento" activado, e intensificada. */
 
     /* ===== Cookie Rain (galletas dinosaurio cayendo) ===== */
     #cookie-layer { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 9999; }
     .falling { position: absolute; pointer-events: auto; touch-action: none; cursor: pointer; user-select: none; -webkit-user-select: none; will-change: transform; filter: drop-shadow(0 6px 10px rgba(0,0,0,.35)); }
     .piece { position: absolute; pointer-events: none; will-change: transform, opacity; }
+
+    /* ===== RASTRO del cursor/dedo: CHISPITAS / MIGUITAS de galleta que saltan ===== */
+    #trail-layer { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 40; }
+    .crumb {
+      position: absolute; width: 6px; height: 6px;
+      border-radius: 40% 55% 50% 45%;   /* forma irregular, como una miga real */
+      will-change: transform, opacity;
+    }
+    /* variantes de color: tonos galleta (marrón/dorado) + alguna chispita clara */
+    .crumb.c-a { background: #b8813f; }
+    .crumb.c-b { background: #8a5a2b; }
+    .crumb.c-c { background: #e6b25e; }
+    .crumb.c-d { background: #ffe6b0; box-shadow: 0 0 4px rgba(255,220,150,0.8); }
 
   </style>
 </head>
@@ -203,7 +251,7 @@
         <span class="step-num">01</span>
         <div class="step-text">
           <h2>El vaso (no sé)</h2>
-          <p class="copy-real">Coges un vaso, no un tupper, no una sartén. Un vaso de 45 cl. Lo pones en la mesa y le das las gracias antes de usarlo 🙏</p>
+          <p class="copy-real">Coges un vaso, no un tupper, no una sartén. Un vaso de 45 cl. Lo pones en la mesa y le das las gracias antes de usarlo <span class="emoji-float">🙏</span></p>
           <span class="dato d1">VASO IKEA 365+ · 45CL</span>
         </div>
         <div class="step-media">
@@ -252,7 +300,7 @@
           <p class="kicker">paso 4 de 5</p>
           <span class="step-num">04</span>
           <div class="bleed-text">
-            <h2>La ruptura 💔 Dinosaurus</h2>
+            <h2>La ruptura <span class="emoji-float">💔</span> Dinosaurus</h2>
             <p class="copy-real">La relación se rompe, pero es lo mejor para ambos (broma poética sin gracia). Coges las galletas <em>dentro del envoltorio</em> las rompes con los pulgares un par de veces y luego los echas dentro del vaso. Mira las imágenes de abajo.</p>
             <span class="dato d4">DINOSAURUS · ARTIACH</span>
           </div>
@@ -316,6 +364,18 @@
 
     <p class="eslogan" id="m-eslogan">Y los miércoles, que es día de dinosaurus, también.</p>
     <p class="foot-note">Cifras calculadas con cariño. Y con bastante azúcar.</p>
+  </section>
+
+  <!-- ===================== TEASER: animación original (Coming Soon) =====================
+       PLACEHOLDER: por ahora es una imagen. En el futuro, para poner el vídeo real,
+       sustituye el <img> de dentro por:
+         <video src="animacion.mp4" controls playsinline poster="coming-soon.jpg"></video>
+       manteniendo la clase .teaser-frame para conservar el estilo y el formato 9:16. -->
+  <section class="teaser reveal">
+    <div class="teaser-frame" role="img" aria-label="Animación original de aguslemacks — próximamente">
+      <img src="coming-soon.jpg" alt="Coming Soon — una animación original de aguslemacks" loading="lazy" />
+    </div>
+    <p class="teaser-cap">Muy pronto: una animación original sobre este ritual.</p>
   </section>
 
   <!-- ===================== CTA / FIRMA ===================== -->
@@ -428,9 +488,188 @@
 
     // ===== 3) Revelado =====
     const io = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+      entries.forEach(e => {
+        if (e.isIntersecting) e.target.classList.add('in');
+      });
     }, { threshold: 0.15 });
     document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // ===== 3a) MOVIMIENTO VIVO DE IMÁGENES (auto la 1ª vez + hover/click), VARIADO =====
+    // Todo por JS para que funcione AUNQUE el sistema tenga "reducir movimiento".
+    // Cada imagen recibe una "receta" distinta -> no todas hacen el mismo movimiento.
+    (function () {
+      // Paletas de movimiento: variaciones de ángulo, escala y dirección.
+      // Cada receta -> keyframes de un "wobble" con vaivén que se posa.
+      const RECIPES = [
+        { rot: -1.1, sx: 1.022, dx: -2, dy: -2 },  // ladea izquierda, sube
+        { rot:  1.0, sx: 1.025, dx:  2, dy: -1.5 },  // ladea derecha
+        { rot: -0.7, sx: 1.03,  dx:  0, dy: -3 },  // recto, salta más
+        { rot:  0.8, sx: 1.018, dx: -2.5, dy: -1 },  // derecha, poco
+        { rot: -1.4, sx: 1.028, dx:  1.5, dy: -2.5 },  // izquierda marcada
+        { rot:  0.6, sx: 1.035, dx: -1, dy: -1.5 }   // derecha, zoom suave
+      ];
+
+      // Construye keyframes de "despertar": reposo -> pico (ladeo+zoom+brillo) -> reposo,
+      // Dos "firmas" muy similares pero distintas:
+      //  - 'auto':  la imagen despierta sola (entra inclinada y se posa).
+      //  - 'manual': el usuario la toca (hover/click) -> vaivén ligero distinto.
+      function framesFor(r, strength, mode) {
+        const k = strength;
+        const glow = 0.30 * k;
+        const bEnd = '0 20px 45px rgba(0,0,0,0.55), 0 0 0 rgba(255,209,102,0)';
+        const bPeak = '0 28px 64px rgba(0,0,0,0.62), 0 0 ' + (44 * k) + 'px rgba(255,209,102,' + glow + ')';
+        const fPeak = 'brightness(' + (1 + 0.09 * k) + ') saturate(' + (1 + 0.09 * k) + ')';
+        const rest = {
+          transform: 'translate(0,0) rotate(0deg) scale(1)',
+          boxShadow: bEnd, filter: 'brightness(1) saturate(1)'
+        };
+        if (mode === 'auto') {
+          // Despierta sola: arranca ya ladeada y vuelve al reposo (como si "se acomodara").
+          return [
+            { transform: 'translate(' + (r.dx * k * 0.6) + 'px,' + (r.dy * k * 0.6) + 'px) rotate(' + (r.rot * k) + 'deg) scale(' + (1 + (r.sx - 1) * k * 0.7) + ')', boxShadow: bPeak, filter: fPeak, offset: 0.42 },
+            { transform: 'translate(' + (-r.dx * k * 0.18) + 'px,' + (-r.dy * k * 0.12) + 'px) rotate(' + (-r.rot * k * 0.28) + 'deg) scale(' + (1 + (r.sx - 1) * k * 0.28) + ')', boxShadow: '0 24px 54px rgba(0,0,0,0.58), 0 0 ' + (20 * k) + 'px rgba(255,209,102,' + (glow * 0.5) + ')', filter: 'brightness(' + (1 + 0.03 * k) + ') saturate(' + (1 + 0.03 * k) + ')', offset: 0.7 },
+            rest
+          ];
+        }
+        // manual: arranca en reposo y hace un vaivén (hacia el otro lado) para distinguirse.
+        return [
+          rest,
+          { transform: 'translate(' + (-r.dx * k * 0.5) + 'px,' + (r.dy * k * 0.5) + 'px) rotate(' + (-r.rot * k) + 'deg) scale(' + (1 + (r.sx - 1) * k) + ')', boxShadow: bPeak, filter: fPeak, offset: 0.45 },
+          { transform: 'translate(' + (r.dx * k * 0.2) + 'px,' + (-r.dy * k * 0.15) + 'px) rotate(' + (r.rot * k * 0.3) + 'deg) scale(' + (1 + (r.sx - 1) * k * 0.32) + ')', boxShadow: '0 24px 54px rgba(0,0,0,0.58), 0 0 ' + (20 * k) + 'px rgba(255,209,102,' + (glow * 0.5) + ')', filter: 'brightness(' + (1 + 0.03 * k) + ') saturate(' + (1 + 0.03 * k) + ')', offset: 0.72 },
+          rest
+        ];
+      }
+
+      const imgs = Array.from(document.querySelectorAll('.step-media img'));
+      imgs.forEach((img, i) => {
+        const recipe = RECIPES[i % RECIPES.length];
+        img.__recipe = recipe;
+        let busy = null;     // animación de "vaivén" puntual (click / auto)
+        let hold = null;     // animación "sostenida" mientras el ratón está encima (PC)
+        const restState = {
+          transform: 'translate(0,0) rotate(0deg) scale(1)',
+          boxShadow: '0 20px 45px rgba(0,0,0,0.55), 0 0 0 rgba(255,209,102,0)',
+          filter: 'brightness(1) saturate(1)'
+        };
+
+        // Vaivén puntual (auto o click).
+        function play(mode, dur) {
+          if (hold) return;               // si está "sostenida" por hover, no compite
+          if (busy) { try { busy.cancel(); } catch (e) {} }
+          const strength = mode === 'auto' ? 1 : (dur >= 2300 ? 1.12 : 1);
+          busy = img.animate(framesFor(recipe, strength, mode),
+            { duration: dur, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'none' });
+          busy.onfinish = busy.oncancel = () => { busy = null; };
+        }
+        img.__play = play;
+
+        // Pose "sostenida" en PC: mientras el ratón está encima, la imagen se queda
+        // levemente ladeada + brillo (con un vaivén de entrada suave). No se buguea.
+        function holdOn() {
+          if (hold || busy) return;
+          const r = recipe, k = 1;
+          hold = img.animate([
+            restState,
+            { transform: 'translate(' + (r.dx * k) + 'px,' + (r.dy * k) + 'px) rotate(' + (r.rot * k) + 'deg) scale(' + (1 + (r.sx - 1) * k) + ')',
+              boxShadow: '0 28px 64px rgba(0,0,0,0.62), 0 0 40px rgba(255,209,102,0.28)',
+              filter: 'brightness(1.08) saturate(1.08)', offset: 0.4 },
+            { transform: 'translate(' + (r.dx * k * 0.8) + 'px,' + (r.dy * k * 0.8) + 'px) rotate(' + (r.rot * k * 0.8) + 'deg) scale(' + (1 + (r.sx - 1) * k * 0.8) + ')',
+              boxShadow: '0 26px 58px rgba(0,0,0,0.6), 0 0 30px rgba(255,209,102,0.2)',
+              filter: 'brightness(1.06) saturate(1.06)', offset: 1 }
+          ], { duration: 700, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' });
+        }
+        function holdOff() {
+          if (!hold) return;
+          try { hold.cancel(); } catch (e) {}
+          hold = null;
+          // Retorno suave al reposo.
+          img.animate([restState], { duration: 400, easing: 'ease-out', fill: 'none' });
+        }
+
+        // MANUAL: hover (PC) y click/tap (móvil).
+        img.addEventListener('mouseenter', () => {
+          const media = img.closest('.step-media');
+          media.dataset.touched = '1';       // anula el auto pendiente
+          holdOn();
+        });
+        img.addEventListener('mouseleave', () => holdOff());
+        img.addEventListener('click', () => {
+          const media = img.closest('.step-media');
+          media.dataset.touched = '1';
+          if (hold) return;                  // en PC ya está sostenida: el click no reanim.
+          play('manual', 2200);
+        });
+      });
+
+      // AUTO la 1ª vez que el bloque de imágenes entra en pantalla.
+      // Si el espectador ya interactuó manualmente, se anula (no se buguea ni se repite).
+      const wakeObserver = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (!e.isIntersecting) return;
+          const media = e.target;
+          if (media.dataset.woke) return;
+          media.dataset.woke = '1';
+          const mimgs = media.querySelectorAll('img');
+          // Tras la caída con peso (~1.1s) la imagen reposa y luego se mueve sola.
+          // En el paso de 2 fotos, una y luego la otra, con más respiro entre ellas.
+          mimgs.forEach((img, i) => {
+            setTimeout(() => {
+              if (media.dataset.touched) return;        // ya hubo interacción manual -> anular
+              if (img.__play) img.__play('auto', 2600);
+            }, 2600 + i * 2000);
+          });
+          wakeObserver.unobserve(media);
+        });
+      }, { threshold: 0.55 });
+      document.querySelectorAll('.step-media').forEach(m => wakeObserver.observe(m));
+    })();
+
+    // ===== 3c) FÍSICA / "PESO" AL APARECER (sutil: casi no se nota, pero está ahí) =====
+    // Cada pieza (número, imagen, etiqueta) cae y se posa con un leve rebote la 1ª vez.
+    // Por JS para que funcione aunque el sistema tenga "reducir movimiento". Variación por paso.
+    (function () {
+      // Caídas muy suaves: apenas se desplazan, pero dan esa sensación de "asentarse".
+      const DROPS = [
+        { fromY: -16, over: 5, tilt: -1.0 },
+        { fromY: -13, over: 4, tilt:  0.8 },
+        { fromY: -18, over: 6, tilt: -0.7 },
+        { fromY: -15, over: 4, tilt:  1.1 },
+        { fromY: -17, over: 5, tilt: -0.9 }
+      ];
+      function fall(el, d, delay, extraRot) {
+        const r0 = extraRot || 0;
+        el.animate([
+          { transform: 'translateY(' + d.fromY + 'px) rotate(' + (r0 + d.tilt) + 'deg) scale(0.975)', opacity: 0, offset: 0 },
+          { transform: 'translateY(' + d.over + 'px) rotate(' + (r0 - d.tilt * 0.2) + 'deg) scale(1.012)', opacity: 1, offset: 0.62 },
+          { transform: 'translateY(' + (-d.over * 0.25) + 'px) rotate(' + (r0 + d.tilt * 0.1) + 'deg) scale(0.998)', opacity: 1, offset: 0.82 },
+          { transform: 'translateY(0) rotate(' + r0 + 'deg) scale(1)', opacity: 1, offset: 1 }
+        ], { duration: 1100, delay: delay, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'both' });
+      }
+      const steps = Array.from(document.querySelectorAll('.step'));
+      const physObserver = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (!e.isIntersecting) return;
+          const step = e.target;
+          if (step.dataset.fell) return;
+          step.dataset.fell = '1';
+          const idx = steps.indexOf(step);
+          const d = DROPS[(idx < 0 ? 0 : idx) % DROPS.length];
+          const num = step.querySelector('.step-num');
+          const media = step.querySelector('.step-media');
+          const dato = step.querySelector('.dato');
+          // Stagger: número -> imagen -> etiqueta, cayendo en secuencia (sensación de montaje).
+          if (num) fall(num, d, 0);
+          if (media) fall(media, d, 140);
+          if (dato) {
+            // La etiqueta conserva su inclinación propia (--rot) como ángulo de reposo.
+            const rot = parseFloat(getComputedStyle(dato).getPropertyValue('--rot')) || 0;
+            fall(dato, d, 280, rot);
+          }
+          physObserver.unobserve(step);
+        });
+      }, { threshold: 0.25 });
+      steps.forEach(s => physObserver.observe(s));
+    })();
 
     // ===== 4) Contador creativo animado =====
     function animateCount(el, target, prefix = '') {
@@ -454,10 +693,92 @@
       });
     }, { threshold: 0.4 });
     counterObserver.observe(document.querySelector('.counter'));
+
+    // ===== 5) RASTRO del cursor/dedo: CHISPITAS de galleta que saltan (física real) =====
+    (function () {
+      // La capa puede no existir aún en el DOM cuando corre este script (va antes en el HTML).
+      let trail = document.getElementById('trail-layer');
+      if (!trail) {
+        trail = document.createElement('div');
+        trail.id = 'trail-layer';
+        trail.setAttribute('aria-hidden', 'true');
+        (document.body || document.documentElement).appendChild(trail);
+      }
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      let lastX = 0, lastY = 0, lastT = 0;
+      const MIN_DIST = reduce ? 34 : 12;  // px mínimos de movimiento entre ráfagas
+      const MIN_MS = reduce ? 40 : 22;    // ms mínimos entre ráfagas
+      const VARIANTS = ['c-a', 'c-b', 'c-c', 'c-a', 'c-b', 'c-d']; // más marrones que claras
+      let alive = 0;
+      const MAX_ALIVE = reduce ? 40 : 120;
+
+      // Crea UNA miguita que salta desde (x,y) con velocidad inicial y cae por gravedad.
+      function spark(x, y, speed) {
+        if (alive >= MAX_ALIVE) return;
+        const c = document.createElement('span');
+        c.className = 'crumb ' + VARIANTS[(Math.random() * VARIANTS.length) | 0];
+        const sz = 2 + Math.random() * 4;              // 2–6px, tamaños variados
+        c.style.width = c.style.height = sz + 'px';
+        c.style.left = x + 'px';
+        c.style.top = y + 'px';
+        trail.appendChild(c);
+        alive++;
+
+        // Dispersión: ángulo hacia arriba/lados + empujón por la velocidad del cursor.
+        const ang = (-Math.PI / 2) + (Math.random() - 0.5) * 2.2; // arriba con apertura
+        const power = 14 + Math.random() * 26 + Math.min(speed * 3, 30);
+        const vx = Math.cos(ang) * power;
+        const vy = Math.sin(ang) * power;
+        const gravity = 90 + Math.random() * 50;       // caída
+        const dur = 520 + Math.random() * 360;
+        const spin = (Math.random() - 0.5) * 720;
+
+        // Keyframes de salto parabólico (dx lineal, dy con gravedad).
+        const frames = [];
+        const N = 6;
+        for (let i = 0; i <= N; i++) {
+          const t = i / N;
+          const dx = vx * t;
+          const dy = vy * t + 0.5 * gravity * t * t * 2.2; // acelera al caer
+          frames.push({
+            transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(' + (spin * t) + 'deg)',
+            opacity: i < N ? (1 - t * 0.5) : 0
+          });
+        }
+        const anim = c.animate(frames, { duration: dur, easing: 'cubic-bezier(0.25,0.6,0.35,1)', fill: 'forwards' });
+        anim.onfinish = () => { c.remove(); alive--; };
+      }
+
+      function burst(x, y) {
+        const now = performance.now();
+        const dx = x - lastX, dy = y - lastY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (now - lastT < MIN_MS) return;
+        if (dist < MIN_DIST) return;
+        const dt = Math.max(now - lastT, 1);
+        const speed = dist / dt * 16; // velocidad aprox en px/frame
+        lastX = x; lastY = y; lastT = now;
+
+        // Varias miguitas por ráfaga (más si vas rápido), como saltando de la galleta.
+        const n = reduce ? 2 : (2 + ((Math.random() * 3) | 0) + (speed > 8 ? 2 : 0));
+        for (let i = 0; i < n; i++) {
+          spark(x + (Math.random() - 0.5) * 8, y + (Math.random() - 0.5) * 8, speed);
+        }
+      }
+
+      window.addEventListener('mousemove', (e) => burst(e.clientX, e.clientY), { passive: true });
+      window.addEventListener('pointermove', (e) => { if (e.pointerType !== 'mouse') burst(e.clientX, e.clientY); }, { passive: true });
+      window.addEventListener('touchmove', (e) => {
+        const t = e.touches && e.touches[0];
+        if (t) burst(t.clientX, t.clientY);
+      }, { passive: true });
+    })();
   </script>
 
   <!-- ===================== COOKIE RAIN (galletas dinosaurio cayendo) ===================== -->
   <div id="cookie-layer" aria-hidden="true"></div>
+  <div id="trail-layer" aria-hidden="true"></div>
   <script src="cookie-rain/cookie-rain.assets.js"></script>
   <script src="cookie-rain/cookie-rain.js"></script>
 
