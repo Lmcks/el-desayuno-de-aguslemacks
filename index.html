@@ -40,6 +40,31 @@
     }
     #progress { position: fixed; top: 0; left: 0; height: 4px; width: 0%; background: var(--accent); z-index: 50; }
 
+    /* ===== VEIL de lluvia suave (paso 4, imágenes 1 y 2) ===== */
+    /* Cubre TODA la pantalla y OCULTA el vídeo de fondo al 100% (no se ve absolutamente).
+       Azul noche tenue + líneas azules cayendo, muy soft. */
+    #rain-veil {
+      position: fixed; inset: 0; z-index: 3; pointer-events: none;
+      opacity: 0; transition: opacity 0.9s ease;
+      background:
+        radial-gradient(120% 80% at 50% 0%, rgba(18,26,52,0.92) 0%, rgba(14,20,44,0.98) 100%),
+        linear-gradient(180deg, rgba(14,20,44,0.96), rgba(10,15,36,0.99));
+    }
+    #rain-veil.on { opacity: 1; }
+    /* Capa de líneas de lluvia: repite un patrón de trazos finos azules que cae. */
+    #rain-veil::before {
+      content: ""; position: absolute; inset: -20% 0 0 0; height: 140%;
+      background-image: repeating-linear-gradient(
+        100deg,
+        transparent 0, transparent 22px,
+        rgba(150,190,255,0.13) 22px, rgba(150,190,255,0.13) 23px,
+        transparent 23px, transparent 46px
+      );
+      background-size: 46px 100%;
+      animation: rain-fall 0.9s linear infinite;
+    }
+    @keyframes rain-fall { from { transform: translateY(-10%); } to { transform: translateY(10%); } }
+
     /* ===== HERO ===== */
     .hero {
       min-height: 100vh; display: flex; flex-direction: column; align-items: center;
@@ -76,7 +101,7 @@
 
     /* ===== PASO 4: GALERÍA KEN-BURNS + THUMBS (de nueva) ===== */
     .step-bleed { height: 300vh; position: relative; }
-    .bleed-sticky { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .bleed-sticky { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; justify-content: center; z-index: 4; }
     .bleed-inner { width: 100%; max-width: var(--col); padding: 0 6vw; text-align: center; }
     .bleed-text h2 { font-size: clamp(1.4rem, 3.8vw, 2.3rem); margin: 12px 0 16px; white-space: nowrap; text-align: center; width: fit-content; position: relative; left: 50%; transform: translateX(-50%); }
     .bleed-text p { font-size: clamp(1rem, 2.6vw, 1.25rem); line-height: 1.6; }
@@ -88,6 +113,7 @@
       border-radius: 22px; overflow: hidden;
       box-shadow: 0 30px 70px rgba(0,0,0,0.5);
       border: 1px solid rgba(255,255,255,0.12);
+      z-index: 5; cursor: pointer;
     }
     .carousel-frame img {
       position: absolute; inset: 0; width: 100%; height: 100%;
@@ -230,6 +256,7 @@
 <body>
 
   <div id="progress"></div>
+  <div id="rain-veil" aria-hidden="true"></div>
 
   <video id="bg-video" muted playsinline webkit-playsinline autoplay loop preload="auto" disableRemotePlayback x5-playsinline>
     <source src="bg-optimized.mp4" type="video/mp4" />
@@ -392,17 +419,17 @@
     document.documentElement.classList.add('js');
     // ============================================================
     //  SITE_CONFIG — contador (datos exactos del creador)
-    //  1 caja Dinosaurus = 10 paquetes = 2,80€
-    //  1 paquete = 4 galletitas
-    //  2 paquetes/día = 8 galletas/día
-    //  cada 5 días = 1 caja = 2,80€
+    //  Regla del ritual:
+    //   · 2 paquetes al día  = 8 galletas diarias (4 mañana + 4 tarde)
+    //   · 1 caja = 10 paquetitos  ->  dura 5 días  (2/día × 5 = 10)
+    //   · cada caja cuesta 2,80€  (redondeado a entero para que se lea mejor)
     // ============================================================
     const SITE_CONFIG = {
       handle: "@aguslemacks",
       inicio: new Date(2018, 0, 1),
       paquetesPorDia: 2,
       galletasPorPaquete: 4,
-      paquetesPorCaja: 10,
+      paquetesPorCaja: 10,   // 1 caja cada 5 días
       precioCaja: 2.80
     };
     const igBtn = document.querySelector('.ig-btn');
@@ -410,10 +437,10 @@
 
     const hoy = new Date();
     const dias = Math.max(1, Math.floor((hoy - SITE_CONFIG.inicio) / 86400000));
-    const paquetes = SITE_CONFIG.paquetesPorDia * dias;
-    const galletas = paquetes * SITE_CONFIG.galletasPorPaquete;
-    const cajas = Math.floor(paquetes / SITE_CONFIG.paquetesPorCaja);
-    const euros = cajas * SITE_CONFIG.precioCaja;
+    const paquetes = SITE_CONFIG.paquetesPorDia * dias;          // 2 × días
+    const galletas = paquetes * SITE_CONFIG.galletasPorPaquete;  // 8 × días
+    const cajas = Math.floor(paquetes / SITE_CONFIG.paquetesPorCaja); // 1 cada 5 días
+    const euros = Math.round(cajas * SITE_CONFIG.precioCaja);    // entero redondo
 
     // ===== ESLOGAN DINÁMICO: día de la semana (todos son día de dinosaurus) =====
     const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
@@ -468,22 +495,92 @@
     updateFromScroll();
     primeVideo();
 
-    // ===== 2) PASO 4 — galería ken-burns + thumbs (de nueva) =====
+    // ===== 2) PASO 4 — galería + veil de lluvia (todo el paso) + interacción (sin auto) =====
     const step4 = document.getElementById('step4');
     const cseq = step4.querySelectorAll('.carousel-frame .cseq');
     const thumbs = step4.querySelectorAll('.thumbs .t');
+    const frames = step4.querySelectorAll('.carousel-frame');   // el marco completo (imagen + borde)
+    const rainVeil = document.getElementById('rain-veil');
     const total = cseq.length;
+    const ES_PC = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    let step4Awake = false;   // PC: hover "despierto" que persiste al scrollear
+
+    // Pose "despierta" del MARCO activo (sin rotación; leve escala + brillo azulado),
+    // se mantiene al scrollear (sin tirones).
+    function awakeActive() {
+      const fr = frames[0];
+      fr.style.transform = 'scale(1.03)';
+      fr.style.filter = 'brightness(1.1) saturate(1.08)';
+      fr.style.boxShadow = '0 30px 70px rgba(0,0,0,0.65), 0 0 34px rgba(120,160,255,0.28)';
+    }
+    function restAll() {
+      frames.forEach(fr => { fr.style.transform = ''; fr.style.filter = ''; fr.style.boxShadow = ''; });
+    }
+
+    let currentIdx = 0;
     function updateStep4() {
       const rect = step4.getBoundingClientRect();
       const denom = rect.height - window.innerHeight;
       const passed = Math.min(Math.max(-rect.top, 0), denom);
       const p = denom > 0 ? passed / denom : 0;
       const idx = Math.min(total - 1, Math.floor(p * total));
+      currentIdx = idx;
       cseq.forEach((im, i) => im.classList.toggle('active', i === idx));
       thumbs.forEach((t, i) => t.classList.toggle('on', i === idx));
+      // VEIL en el paso 4, con 2 "fotogramas" de margen antes y corta POCO ANTES de que
+      // el bloque 4 se desbloquee (deje de estar sticky). El bloque suelta en rect.top = -2*vh,
+      // así que apagamos un pelín antes (-1.85*vh) para que el paso 5 aparezca con scroll normal.
+      //  - entra 2 fotogramas antes: rect.top <= 0.5 * viewport (viniendo de abajo)
+      //  - sale poco antes de desbloquear el bloque 4: rect.top > -1.85 * viewport
+      const vh = window.innerHeight;
+      const entra = rect.top <= vh * 0.5;
+      const sale  = rect.top > -vh * 1.85;
+      if (entra && sale) rainVeil.classList.add('on'); else rainVeil.classList.remove('on');
+      // Si PC está "despierto" por hover, mantengo la pose en el marco activo.
+      if (ES_PC && step4Awake) awakeActive();
     }
     window.addEventListener('scroll', updateStep4, { passive: true });
     window.addEventListener('resize', updateStep4);
+
+    // INTERACCIÓN paso 4:
+    //  - PC:   sin auto. HOVER (sobre el MARCO) despierta la foto y SE MANTIENE al scrollear
+    //          (sin tirones). Al salir del paso 4, vuelve al reposo.
+    //          Usamos mousemove global + hit-test del rect del frame (no falla por apilamiento).
+    //  - MÓVIL: sin auto. CLIC/tap despierta el marco activo (vaivén puntual).
+    if (ES_PC) {
+      window.addEventListener('mousemove', (e) => {
+        const fr = frames[0];
+        const r = fr.getBoundingClientRect();
+        const dentro = e.clientX >= r.left && e.clientX <= r.right &&
+                       e.clientY >= r.top && e.clientY <= r.bottom;
+        // Solo "despierto" MIENTRAS el ratón esté encima. Al salir, vuelve al reposo.
+        // Se mantiene al scrollear (sin tirones) mientras sigas encima.
+        if (dentro) { if (!step4Awake) { step4Awake = true; awakeActive(); } }
+        else if (step4Awake) { step4Awake = false; restAll(); }
+      }, { passive: true });
+      // Por si el scroll mueve el marco fuera del ratón (sin mousemove), también apaga.
+      window.addEventListener('scroll', () => {
+        if (!step4Awake) return;
+        const fr = frames[0];
+        const r = fr.getBoundingClientRect();
+        const cx = lastMouseX, cy = lastMouseY;
+        const dentro = cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom;
+        if (!dentro) { step4Awake = false; restAll(); }
+      }, { passive: true });
+      var lastMouseX = -1, lastMouseY = -1;
+      window.addEventListener('mousemove', (e) => { lastMouseX = e.clientX; lastMouseY = e.clientY; }, { passive: true });
+    } else {
+      frames.forEach(fr => {
+        fr.addEventListener('click', () => {
+          fr.animate(
+            [{ transform: 'scale(1) rotate(0deg)' },
+             { transform: 'scale(1.02) rotate(-0.9deg)' },
+             { transform: 'scale(1) rotate(0deg)' }],
+            { duration: 900, easing: 'ease-in-out' }
+          );
+        });
+      });
+    }
     updateStep4();
 
     // ===== 3) Revelado =====
@@ -545,16 +642,15 @@
         const recipe = RECIPES[i % RECIPES.length];
         img.__recipe = recipe;
         let busy = null;     // animación de "vaivén" puntual (click / auto)
-        let hold = null;     // animación "sostenida" mientras el ratón está encima (PC)
         const restState = {
           transform: 'translate(0,0) rotate(0deg) scale(1)',
           boxShadow: '0 20px 45px rgba(0,0,0,0.55), 0 0 0 rgba(255,209,102,0)',
           filter: 'brightness(1) saturate(1)'
         };
 
-        // Vaivén puntual (auto o click).
+        // Vaivén puntual (auto o click en móvil).
         function play(mode, dur) {
-          if (hold) return;               // si está "sostenida" por hover, no compite
+          if (hold) return;                  // si está sostenida por hover, no compite
           if (busy) { try { busy.cancel(); } catch (e) {} }
           const strength = mode === 'auto' ? 1 : (dur >= 2300 ? 1.12 : 1);
           busy = img.animate(framesFor(recipe, strength, mode),
@@ -563,8 +659,9 @@
         }
         img.__play = play;
 
-        // Pose "sostenida" en PC: mientras el ratón está encima, la imagen se queda
-        // levemente ladeada + brillo (con un vaivén de entrada suave). No se buguea.
+        // Pose "sostenida" SOLO en PC: mientras el ratón está encima, la imagen se queda
+        // levemente ladeada + brillo. En móvil NUNCA se usa (evita el bug de "pillada").
+        let hold = null;
         function holdOn() {
           if (hold || busy) return;
           const r = recipe, k = 1;
@@ -582,27 +679,25 @@
           if (!hold) return;
           try { hold.cancel(); } catch (e) {}
           hold = null;
-          // Retorno suave al reposo.
           img.animate([restState], { duration: 400, easing: 'ease-out', fill: 'none' });
         }
 
-        // MANUAL: hover (PC, sostenido) y click/tap (móvil, vaivén puntual).
-        // En táctil NUNCA se sostiene: el tap solo dispara el vaivén y vuelve al reposo.
-        const SOSTIENE_EN_PC = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        // INTERACCIÓN (según regla):
+        //  - PC:   HOVER reacciona (vaivén) y anula el auto si pasas antes. CLIC no reacciona.
+        //  - MÓVIL: automático + CLIC/tap (vaivén). El "pasar por encima" no aplica.
+        const ES_PC = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
         img.addEventListener('mouseenter', () => {
+          if (!ES_PC) return;                    // en móvil el hover no aplica
           const media = img.closest('.step-media');
-          media.dataset.touched = '1';          // anula el auto pendiente
-          if (SOSTIENE_EN_PC) holdOn();         // solo ratón fino -> pose sostenida
+          media.dataset.touched = '1';           // anula el auto pendiente
+          holdOn();                              // PC: se queda "despierta" mientras el ratón esté encima
         });
-        img.addEventListener('mouseleave', () => { if (SOSTIENE_EN_PC) holdOff(); });
+        img.addEventListener('mouseleave', () => { if (ES_PC) holdOff(); });
         img.addEventListener('click', () => {
           const media = img.closest('.step-media');
           media.dataset.touched = '1';
-          // En cualquier caso, limpia un hold residual (por si un tap emuló mouseenter)
-          // y asegura retorno a reposo; luego el vaivén puntual.
-          if (hold) { try { hold.cancel(); } catch (e) {} hold = null; }
-          if (SOSTIENE_EN_PC && hold) return;   // en PC ya está sostenida: no reanim
-          play('manual', 2200);                 // móvil (y click en PC): vaivén puntual
+          if (ES_PC) return;                     // en PC el clic NO mueve la imagen
+          play('manual', 2200);                  // móvil: vaivén al tocar
         });
       });
 
