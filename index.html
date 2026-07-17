@@ -60,10 +60,10 @@
     }
     #rain-veil.on { opacity: 1; }
     /* Capa de líneas de lluvia: patrón de líneas finas azules. Se anima con background-position
-       (continuo, sin cortes) y muy lento. El patrón se repite cada 60px en Y, y la animación
-       mueve exactamente 60px -> bucle invisible. */
-    #rain-veil::before {
-      content: ""; position: absolute; inset: 0;
+       (continuo, sin cortes). El movimiento lo da JS (WAAPI) para que sea fluido y
+       funcione aunque el móvil tenga prefers-reduced-motion. El patrón se repite cada 62px. */
+    #rain-veil .rain-lines {
+      position: absolute; inset: -10% 0;
       background-image: repeating-linear-gradient(
         102deg,
         transparent 0, transparent 30px,
@@ -71,11 +71,7 @@
         transparent 31px, transparent 62px
       );
       background-size: 62px 62px;
-      animation: rain-fall 6s linear infinite;
-    }
-    @keyframes rain-fall {
-      from { background-position: 0 0; }
-      to   { background-position: -20px 62px; }
+      will-change: transform;
     }
 
     /* ===== HERO ===== */
@@ -271,7 +267,7 @@
 <body>
 
   <div id="progress"></div>
-  <div id="rain-veil" aria-hidden="true"></div>
+  <div id="rain-veil" aria-hidden="true"><div class="rain-lines"></div></div>
 
   <video id="bg-video" muted playsinline webkit-playsinline autoplay loop preload="auto" disableRemotePlayback x5-playsinline>
     <source src="bg-optimized.mp4" type="video/mp4" />
@@ -516,6 +512,8 @@
     const thumbs = step4.querySelectorAll('.thumbs .t');
     const frames = step4.querySelectorAll('.carousel-frame');   // el marco completo (imagen + borde)
     const rainVeil = document.getElementById('rain-veil');
+    const rainLines = rainVeil.querySelector('.rain-lines');  // líneas de lluvia (animadas por JS)
+    let rainAnim = null;   // animación WAAPI de las líneas
     const total = cseq.length;
     const ES_PC = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     let step4Awake = false;   // PC: hover "despierto" que persiste al scrollear
@@ -580,6 +578,16 @@
       if (debeEstarOn !== rainOn) {            // SOLO cambia si el estado realmente cambia
         rainOn = debeEstarOn;
         rainVeil.classList.toggle('on', rainOn);
+        // Lluvia: animación con WAAPI (fluida y funciona con prefers-reduced-motion).
+        // translateY de 62px (un patrón completo) en bucle infinito y lento.
+        if (rainOn) {
+          if (!rainAnim || rainAnim.playState === 'finished') {
+            rainAnim = rainLines.animate(
+              [{ transform: 'translateY(0)' }, { transform: 'translateY(62px)' }],
+              { duration: 2600, iterations: Infinity, easing: 'linear' }
+            );
+          } else { rainAnim.play(); }
+        } else if (rainAnim) { rainAnim.pause(); }
       }
       // Si PC está "despierto" por hover, mantengo la pose en el marco activo.
       if (ES_PC && step4Awake) awakeActive();
