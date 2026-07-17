@@ -586,18 +586,23 @@
           img.animate([restState], { duration: 400, easing: 'ease-out', fill: 'none' });
         }
 
-        // MANUAL: hover (PC) y click/tap (móvil).
+        // MANUAL: hover (PC, sostenido) y click/tap (móvil, vaivén puntual).
+        // En táctil NUNCA se sostiene: el tap solo dispara el vaivén y vuelve al reposo.
+        const SOSTIENE_EN_PC = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
         img.addEventListener('mouseenter', () => {
           const media = img.closest('.step-media');
-          media.dataset.touched = '1';       // anula el auto pendiente
-          holdOn();
+          media.dataset.touched = '1';          // anula el auto pendiente
+          if (SOSTIENE_EN_PC) holdOn();         // solo ratón fino -> pose sostenida
         });
-        img.addEventListener('mouseleave', () => holdOff());
+        img.addEventListener('mouseleave', () => { if (SOSTIENE_EN_PC) holdOff(); });
         img.addEventListener('click', () => {
           const media = img.closest('.step-media');
           media.dataset.touched = '1';
-          if (hold) return;                  // en PC ya está sostenida: el click no reanim.
-          play('manual', 2200);
+          // En cualquier caso, limpia un hold residual (por si un tap emuló mouseenter)
+          // y asegura retorno a reposo; luego el vaivén puntual.
+          if (hold) { try { hold.cancel(); } catch (e) {} hold = null; }
+          if (SOSTIENE_EN_PC && hold) return;   // en PC ya está sostenida: no reanim
+          play('manual', 2200);                 // móvil (y click en PC): vaivén puntual
         });
       });
 
@@ -616,7 +621,7 @@
             setTimeout(() => {
               if (media.dataset.touched) return;        // ya hubo interacción manual -> anular
               if (img.__play) img.__play('auto', 2600);
-            }, 2600 + i * 2000);
+            }, 3200 + i * 2400);                         // margen amplio: evita choque con tap manual
           });
           wakeObserver.unobserve(media);
         });

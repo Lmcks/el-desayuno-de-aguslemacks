@@ -8,9 +8,9 @@
    ========================================================================= */
 
 const CONFIG = {
-  spawnMinMs: 6000,        // mínimo entre apariciones (casi easter egg)
-  spawnMaxMs: 60000,       // máximo: nunca esperes mas de 60s
-  maxCookies: 3,           // tope de galletas cayendo a la vez (con esperas largas basta 1-2)
+  spawnMinMs: 2500,        // mínimo entre apariciones (casi siempre hay alguna cayendo)
+  spawnMaxMs: 9000,        // máximo: nunca esperes mas de 9s
+  maxCookies: 3,           // tope de galletas cayendo a la vez
   cookieSizeMin: 150,      // ANCHO px de la galleta al caer (mantiene su forma)
   cookieSizeMax: 260,
   fallDurationMin: 6500,   // ms en cruzar la pantalla
@@ -22,6 +22,7 @@ const CONFIG = {
   jitterDirX: 0.25,        // aleatoriedad del ángulo de salida
   jitterDirY: 0.18,
   forceRain: true,         // SIEMPRE caen solas (igual que en las pruebas).
+  scrollSpawnGapMs: 4000,  // si haces scroll y han pasado >4s sin galleta, suelta una
   assets: {
     cookie: 'assets/cookie.png',
     // Lista de trozos INCRUSTADA (no hace falta manifest.json ni servidor).
@@ -263,6 +264,21 @@ function startRain() {
     setTimeout(tick, rand(CONFIG.spawnMinMs, CONFIG.spawnMaxMs));
   };
   setTimeout(tick, 600);
+
+  // Al hacer scroll, si llevamos un rato sin galletas, soltamos una para que
+  // siempre haya acción visible (evita el "a veces no aparecen").
+  let lastSpawn = Date.now();
+  const origSpawn = spawnCookie;
+  spawnCookie = function () { lastSpawn = Date.now(); return origSpawn(); };
+  let scrollLock = false;
+  window.addEventListener('scroll', () => {
+    if (scrollLock) return;
+    if (Date.now() - lastSpawn > CONFIG.scrollSpawnGapMs) {
+      scrollLock = true;
+      spawnCookie();
+      setTimeout(() => { scrollLock = false; }, 1200); // no saturar en scroll continuo
+    }
+  }, { passive: true });
 }
 
 /* Arranque ---------------------------------------------------------------- */
