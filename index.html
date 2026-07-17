@@ -27,7 +27,8 @@
 
     /* ===== FONDO: solo video difuminado ===== */
     #bg-video {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      position: fixed; top: 0; left: 0; width: 100vw;
+      height: 100vh; height: 100dvh;   /* dvh evita el hueco abajo en móvil al ocultarse la URL-bar */
       object-fit: cover; object-position: center;
       z-index: -2; background: #000; pointer-events: none;
       filter: blur(var(--bg-blur));
@@ -41,31 +42,35 @@
     #progress { position: fixed; top: 0; left: 0; height: 4px; width: 0%; background: var(--accent); z-index: 50; }
 
     /* ===== VEIL de lluvia suave (paso 4) ===== */
-    /* Vive DENTRO de .step-bleed como absolute de 300vh y se desplaza con el scroll.
-       Así en móvil NO deja hueco abajo al ocultarse la URL-bar (el fixed sí lo hacía)
-       y la barra de progreso de arriba nunca queda tapada. Cubre TODO el bloque. */
+    /* fixed + 100dvh cubre TODA la ventana (incluido el margen abajo en móvil).
+       z-index 45: POR DEBAJO de #progress (50, siempre visible encima) y POR DEBAJO
+       del contenido del paso 4 (.bleed-sticky z-index 60, que queda encima de la lluvia).
+       Oculta el vídeo (-2) pero nunca la barra ni el texto/foto.
+       Fade largo y suave para que no entre "en bloque". */
     #rain-veil {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      z-index: 3; pointer-events: none;
-      opacity: 0; transition: opacity 0.9s ease;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      height: 100vh; height: 100dvh; z-index: 45; pointer-events: none;
+      opacity: 0; transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
       background:
         radial-gradient(120% 80% at 50% 0%, rgba(18,26,52,0.92) 0%, rgba(14,20,44,0.98) 100%),
         linear-gradient(180deg, rgba(14,20,44,0.96), rgba(10,15,36,0.99));
     }
     #rain-veil.on { opacity: 1; }
-    /* Capa de líneas de lluvia: repite un patrón de trazos finos azules que cae. */
+    /* Capa de líneas de lluvia: patrón de trazos finos azules que cae de forma continua.
+       El patrón se repite verticalmente cada 60px; la animación desplaza EXACTAMENTE 60px
+       (una altura de patrón) para que el bucle sea invisible (sin "reinicio"). Muy lenta. */
     #rain-veil::before {
-      content: ""; position: absolute; inset: -20% 0 0 0; height: 140%;
+      content: ""; position: absolute; left: 0; right: 0; top: -120px; height: calc(100% + 240px);
       background-image: repeating-linear-gradient(
         100deg,
-        transparent 0, transparent 22px,
-        rgba(150,190,255,0.13) 22px, rgba(150,190,255,0.13) 23px,
-        transparent 23px, transparent 46px
+        transparent 0, transparent 28px,
+        rgba(150,190,255,0.12) 28px, rgba(150,190,255,0.12) 29px,
+        transparent 29px, transparent 60px
       );
-      background-size: 46px 100%;
-      animation: rain-fall 0.9s linear infinite;
+      background-size: 60px 60px;
+      animation: rain-fall 7s linear infinite;
     }
-    @keyframes rain-fall { from { transform: translateY(-10%); } to { transform: translateY(10%); } }
+    @keyframes rain-fall { from { transform: translateY(0); } to { transform: translateY(60px); } }
 
     /* ===== HERO ===== */
     .hero {
@@ -103,7 +108,9 @@
 
     /* ===== PASO 4: GALERÍA KEN-BURNS + THUMBS (de nueva) ===== */
     .step-bleed { height: 300vh; position: relative; }
-    .bleed-sticky { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; justify-content: center; z-index: 4; }
+    /* z-index 60: el contenido del paso 4 queda ENCIMA del veil de lluvia (45) y de la
+       barra de progreso (50) -> la lluvia nunca tapa el texto ni la foto, ni la barra. */
+    .bleed-sticky { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; justify-content: center; z-index: 60; }
     .bleed-inner { width: 100%; max-width: var(--col); padding: 0 6vw; text-align: center; }
     .bleed-text h2 { font-size: clamp(1.4rem, 3.8vw, 2.3rem); margin: 12px 0 16px; white-space: nowrap; text-align: center; width: fit-content; position: relative; left: 50%; transform: translateX(-50%); }
     .bleed-text p { font-size: clamp(1rem, 2.6vw, 1.25rem); line-height: 1.6; }
@@ -258,6 +265,7 @@
 <body>
 
   <div id="progress"></div>
+  <div id="rain-veil" aria-hidden="true"></div>
 
   <video id="bg-video" muted playsinline webkit-playsinline autoplay loop preload="auto" disableRemotePlayback x5-playsinline>
     <source src="bg-optimized.mp4" type="video/mp4" />
@@ -323,9 +331,6 @@
 
     <!-- PASO 4 — GALERÍA KEN-BURNS + THUMBS (de nueva) -->
     <section class="step-bleed" id="step4">
-      <!-- VEIL de lluvia: vive DENTRO del bloque (absolute, 300vh) y se desplaza con el
-           scroll. No usa position:fixed para evitar el hueco abajo en móvil (URL-bar). -->
-      <div id="rain-veil" aria-hidden="true"></div>
       <div class="bleed-sticky">
         <div class="bleed-inner">
           <p class="kicker">paso 4 de 5</p>
